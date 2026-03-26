@@ -1,36 +1,38 @@
-jQuery(document).ready(function($) {
-    console.log(bs_breakpoints_vars);
-    var type = bs_breakpoints_vars.type_selector;
-    var choices = bs_breakpoints_vars.choices_wrapper;
-    $(type).each(function(){
+( function ( $ ) {
+    'use strict';
 
-        // Initially hide choices textarea if the type is not 'select'
-        if ($(this).val() !== 'select') {
-            $(choices).hide();
-        }else{
-            $(choices).show();
-        }
+    $( document ).on( 'acf/setup_fields', function ( e, $el ) {
+        $el.find( '.bsbp-type-setting select' ).each( function () {
+            var $select = $( this );
+            if ( $select.data( 'bsbp-bound' ) ) return;
+            $select.data( 'bsbp-bound', true );
 
-        if (['true_false', 'image', 'color_picker', 'select'].includes($(this).val())) {
-            $(".bs-breakpoints-choices-defaults").hide();
-        }else{
-            $(".bs-breakpoints-choices-defaults").show();
-        }
+            var $wrap    = $select.closest( '.acf-field-object, .acf-field-settings, form' );
+            var $choices = $wrap.find( '.bsbp-choices-setting' );
+            var $units   = $wrap.find( '.bsbp-units-setting' );
+            var $default = $wrap.find( '.bsbp-default-setting' );
+            var $bpDefs  = $wrap.find( '.bsbp-bp-default-cell' );
 
-        // Show/hide choices textarea based on selected type
-        $(document).on('change', type, function() {
-            var selectedType = $(this).val();
-            if (selectedType === 'select') {
-                $(choices).show();
-            } else {
-                $(choices).hide();
+            function toggle() {
+                var val = $select.val();
+                $choices.toggle( val === 'select' );
+                $units.toggle( val === 'units' );
+
+                var hideDefault = [ 'true_false', 'image', 'color_picker', 'select' ].includes( val );
+                $default.toggle( ! hideDefault );
+                $bpDefs.toggle( ! hideDefault );
             }
-            if (['true_false', 'image', 'color_picker', 'select'].includes(selectedType)) {
-                $(".bs-breakpoints-choices-defaults").hide();
-            }else{
-                $(".bs-breakpoints-choices-defaults").show();
-            }
-        }).trigger("change");
 
-    });
-});
+            $select.on( 'change', toggle );
+            toggle();
+        } );
+    } );
+
+    // Breakpoint row enabled/disabled visual feedback
+    $( document ).on( 'change', '.bsbp-visibility-table input[type="checkbox"]', function () {
+        var $row = $( this ).closest( 'tr.bsbp-bp-row' );
+        $row.toggleClass( 'is-enabled', this.checked );
+        $row.toggleClass( 'is-disabled', ! this.checked );
+    } );
+
+} )( jQuery );
