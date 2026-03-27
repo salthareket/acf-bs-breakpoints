@@ -2,11 +2,21 @@
 /**
  * Plugin Name: ACF Bootstrap Breakpoints
  * Description: Bootstrap breakpoint'leri için özel ACF alan tipi. Her breakpoint için ayrı değer girilebilir.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Tolga Koçak
+ * Requires Plugins: advanced-custom-fields
  */
 
 if ( ! defined( 'ABSPATH' ) ) { exit; }
+
+// Bağımlılık kontrolü
+add_action( 'admin_init', function() {
+    if ( ! class_exists( 'ACF' ) && ! class_exists( 'acf' ) ) {
+        add_action( 'admin_notices', function() {
+            echo '<div class="notice notice-error"><p><strong>ACF Bootstrap Breakpoints:</strong> Advanced Custom Fields (ACF) eklentisi yüklü ve aktif olmalıdır.</p></div>';
+        });
+    }
+});
 
 add_action( 'acf/include_field_types', function() {
     if ( class_exists( 'acf_bs_breakpoints' ) ) return;
@@ -49,7 +59,7 @@ add_action( 'acf/include_field_types', function() {
 
             $this->env = [
                 'url'     => plugin_dir_url( __FILE__ ),
-                'version' => '1.2.0',
+                'version' => '1.2.1',
             ];
 
             $this->preview_image = $this->env['url'] . 'assets/images/field-preview-custom.png';
@@ -371,5 +381,5 @@ add_action( 'acf/include_field_types', function() {
         }
     }
 
-    new acf_bs_breakpoints();
+    acf_register_field_type( new acf_bs_breakpoints() );
 } );
